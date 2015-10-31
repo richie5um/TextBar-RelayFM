@@ -21,12 +21,12 @@ case "$RELAY_STATUS" in
         SHOW_TITLE=`echo "$RELAY_STATUS" | sed 's#On-Air: ##g' `
 
         # If we don't get a show title for some reason, use something else
-        [[ "$SHOW_TITLE" == "" ]] && SHOW_TITLE="Relay.fm is live"
+        [[ "$SHOW_TITLE" == "" ]] && SHOW_TITLE="Relay FM is live"
 
         # Output the information to stdout
         echo "🎣 $SHOW_TITLE"
 
-        echo "Go to Relay.FM"
+        echo "Go to relay.fm"
 
         exit 0
     ;;
@@ -85,7 +85,7 @@ case "$RELAY_STATUS" in
             else
                 # if a previous file doesn't exist
                 # or is 0 bytes, just give an error
-                echo "RelayFM Error"
+                echo "Relay FM Error"
 
                 exit 0
             fi
@@ -104,79 +104,26 @@ case "$RELAY_STATUS" in
         # Get the time and strip any leading spaces or tabs
         SHOW_TIME=`fgrep -A1 '<td class="event-time">' "$FILE" | head -2 | tail -1 | sed 's#^[     ]*##g'`
 
-        # This will give us the month, but as letters. Numbers use fewer characters
-        # so we'll convert that in a moment
+        # This will give us the month as letters.
         MONTH="${SHOW_DATE[2]}"
-
-        case "$MONTH" in
-            Jan*)
-                MONTH='1'
-            ;;
-
-            Feb*)
-                MONTH='2'
-            ;;
-
-            Mar*)
-                MONTH='3'
-            ;;
-
-            Ap*)
-                MONTH='4'
-            ;;
-
-            May)
-                MONTH='5'
-            ;;
-
-            Jun*)
-                MONTH='6'
-            ;;
-
-            Jul*)
-                MONTH='7'
-            ;;
-
-            Au*)
-                MONTH='8'
-            ;;
-
-            Se*)
-                MONTH='9'
-            ;;
-
-            Oc*)
-                MONTH='10'
-            ;;
-
-            No*)
-                MONTH='11'
-            ;;
-
-            De*)
-                MONTH='12'
-            ;;
-
-        esac
 
         # Get the number, remove the comma
         DAY_OF_MONTH=`echo "${SHOW_DATE[1]}" | tr -d ','`
 
-        # now get today's month/date (remove any leading zeros)
-        # so '05/01' becomes '5/1'
-        TODAYS_DATE=`date '+%m/%d' | sed 's#^0##g; s#/0#/#g'`
+        # now get today's month/date (strip leading zeros from the day)
+        TODAYS_DATE=`date '+%b %d' | sed 's# 0*# #g'`
 
-        if [[ "$TODAYS_DATE" == "$MONTH/$DAY_OF_MONTH" ]]
+        if [[ "$TODAYS_DATE" == "$MONTH $DAY_OF_MONTH" ]]
         then
             # The next show is today, just show time
             echo "$SHOW_TITLE ($SHOW_TIME)" | tee "$PREVIOUS"
 
         else
             # Output the show title, month/day @ time)
-            echo "$SHOW_TITLE ($MONTH/$DAY_OF_MONTH @ $SHOW_TIME)" | tee "$PREVIOUS"
+            echo "$SHOW_TITLE ($MONTH $DAY_OF_MONTH @ $SHOW_TIME)" | tee "$PREVIOUS"
         fi
 
-        echo "Go to Relay.FM"
+        echo "Go to relay.fm"
     ;;
 
 esac
