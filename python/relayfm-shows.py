@@ -1,4 +1,4 @@
-# curl 'http://www.relay.fm/master/feed' | tr -d '\n' | python -m relayfm-shows.py
+# curl 'http://www.relay.fm/master/feed' | tr -d '\n' | python relayfm-shows.py
 
 import re, sys
 
