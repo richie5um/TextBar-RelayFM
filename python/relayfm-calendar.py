@@ -1,16 +1,27 @@
-# curl 'https://www.google.com/calendar/htmlembed?showTitle=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA&height=600&wkst=1&bgcolor=%23FFFFFF&src=relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o@group.calendar.google.com&color=%23182C57&ctz=' -sfL | tr -d '\n' | python relayfm-calendar.py
+import sys
+from datetime import datetime
 
-import re, sys
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
-p = re.compile(ur'<div class=\"date-section[^>]+[>][^>]+[>](?P<date>[^<]+).*?(class="events".*?"event-time">(?P<time>[^<]+))+')
-test_str = sys.stdin.read()
-matches = re.findall(p, test_str)
+html_str = sys.stdin.read()
 
-print matches
+tree = ET.fromstring(html_str)
+for elem in tree.iterfind(".//{http://www.w3.org/1999/xhtml}div[@class='view-container-border view-container']"):
+	for day in elem:
+		eventDate = day.findtext(".//{http://www.w3.org/1999/xhtml}div[@class='date']")
+		eventDate = eventDate.strip()
+		for event in day.iterfind(".//{http://www.w3.org/1999/xhtml}tr[@class='event']"):			
+			eventTime = event.findtext(".//{http://www.w3.org/1999/xhtml}td[@class='event-time']")
+			eventTime = eventTime.strip()
+			
+			eventName = event.findtext(".//{http://www.w3.org/1999/xhtml}span[@class='event-summary']")
+			eventName = eventName.strip()
+			
+			eventDateTimeString = '{} {}'.format(eventDate, eventTime)
+			eventDateTime = datetime.strptime(eventDateTimeString, '%a %d %b %Y %H:%M')
 
-# for match in matches:
-# 	print "{0} [{1}]".format(match[0], match[1])
-	
-# target = open('/tmp/relayfm.shows.actions', 'w')
-# for match in matches:
-# 	target.write("{0}\n".format(match[2]))
+			if eventDateTime.date() > datetime.today().date():
+				print eventDate, eventTime, eventName
